@@ -1,0 +1,35 @@
+﻿<Publish>
+	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
+	<ModId Value="ukrainian_localization" />
+	<!--Name of the mod to display to players-->
+	<DisplayName Value="Ukrainian localization / Українська локалізація" />
+	<!--Short description of the mod-->
+	<ShortDescription Value="Ukrainian/Українська" />
+	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
+	<!--LongDescription Value="Ukrainian localization for Cities: Skylines II" /-->
+	<LongDescription>
+    Ukrainian localization for Cities: Skylines II
+    Українська локалізація для Cities: Skylines II
+  </LongDescription>
+	<!--Thumbnail-->
+	<Thumbnail Value="Properties/Thumbnail.png" />
+	<!--Screenshot, can be set multiple times-->
+	<Screenshot Value="" />
+	<!--Tag, can be set multiple times-->
+	<Tag Value="Code Mod" />
+	<!--Link to the forum post where the mod can be discussed-->
+	<ForumLink Value="" />
+	<!--Version of the mod-->
+	<ModVersion Value="1.0" />
+	<!--Recommended version of the base game to use the mod-->
+	<GameVersion Value="1.1.*" />
+	<!--Dependency for the mod, can be set multiple times-->
+	<Dependency Id="" />
+	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
+	<ChangeLog Value="Тепер можна встановлювати локалізацію як мод." />
+	<!--ChangeLog>
+	</ChangeLog-->
+	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon-->
+	<ExternalLink Type="discord" Url="https://discord.gg/qCUJfWG8Vy" />
+  <ExternalLink Type="patreon" Url="https://www.patreon.com/user?u=95419221" />
+</Publish>
