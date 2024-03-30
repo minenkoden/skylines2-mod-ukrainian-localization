@@ -77,9 +77,9 @@
 		<None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="localization\" />
-	</ItemGroup>
+  <ItemGroup>
+    <Folder Include="localization\" />
+  </ItemGroup>
 
 	<ItemGroup>
 	  <None Update="localization\uk-UA.loc">

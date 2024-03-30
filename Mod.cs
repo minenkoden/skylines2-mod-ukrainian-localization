@@ -11,6 +11,7 @@ using System.IO;
 using System.Collections.Generic;
 using Unity.Entities;
 using Colossal;
+using Game.UI.Localization;
 
 namespace Ukrainian_localization_CSII
 {
@@ -38,6 +39,13 @@ namespace Ukrainian_localization_CSII
             //log.Info($"{ukrainianLocAsset.localeId}, {ukrainianLocAsset.systemLanguage}, {ukrainianLocAsset.localizedName}");
             GameManager.instance.localizationManager.AddLocale(ukrainianLocAsset);
             GameManager.instance.localizationManager.AddSource(ukrainianLocAsset.localeId, (IDictionarySource)ukrainianLocAsset);
+
+            if (GameManager.instance.localizationManager.activeLocaleId == ukrainianLocAsset.localeId)
+            {
+                GameManager.instance.localizationManager.SetActiveLocale(ukrainianLocAsset.localeId);
+                
+                GameManager.instance.localizationManager.ReloadActiveLocale();
+            }
 
         }
 
