@@ -5,52 +5,81 @@ using Game;
 using Game.Modding;
 using Game.SceneFlow;
 using System;
-using System.Drawing.Printing;
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
-using Unity.Entities;
 using Colossal;
-using Game.UI.Localization;
+using System.Linq;
 
 namespace Ukrainian_localization_CSII
 {
     public class Mod : IMod
     {
         public static ILog log = LogManager.GetLogger($"{nameof(Ukrainian_localization_CSII)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
+        private LocalizationManager _localizationManager;
 
         public void OnLoad(UpdateSystem updateSystem)
         {
-            log.Info(nameof(OnLoad));
+            log.Info(nameof(OnLoad) + " called in phase " + updateSystem.currentPhase);
 
             if (GameManager.instance.modManager.TryGetExecutableAsset(this, out var asset))
                 log.Info($"Current mod asset at {asset.path}");
 
-            //log.Info($"Current mod asset sub path at {asset.subPath}");
-            // Get the directory of the assetPath
-            string directoryPath = Path.GetDirectoryName(asset.path);
-            //log.Info($"directoryPath {directoryPath}");
-            string localizedPath = Path.Combine(directoryPath, "localization", "uk-UA.loc");
-            //log.Info($"localizedPath {localizedPath}");
+            _localizationManager = GameManager.instance.localizationManager;
 
-            //GameManager.instance.localizationManager.AddLocale(ukrainianLocAsset);
-            var ukrainianLocAsset = new LocaleAsset();
-            Load(ukrainianLocAsset, localizedPath);
-            //log.Info($"{ukrainianLocAsset.localeId}, {ukrainianLocAsset.systemLanguage}, {ukrainianLocAsset.localizedName}");
-            GameManager.instance.localizationManager.AddLocale(ukrainianLocAsset);
-            GameManager.instance.localizationManager.AddSource(ukrainianLocAsset.localeId, (IDictionarySource)ukrainianLocAsset);
+            LogManagerLocales();
+            LogDbLocales();
 
-            if (GameManager.instance.localizationManager.activeLocaleId == ukrainianLocAsset.localeId)
+            var ukrainianLocAsset = LoadUkrainianLocAsset(asset);
+
+            _localizationManager.AddLocale(ukrainianLocAsset);
+            _localizationManager.AddSource(ukrainianLocAsset.localeId, ukrainianLocAsset);
+            
+            log.Info($"Current active locale {_localizationManager.activeLocaleId}");
+
+            _localizationManager.SetActiveLocale(ukrainianLocAsset.localeId);
+
+            LogManagerLocales();
+            LogDbLocales();
+        }
+
+        private LocaleAsset LoadUkrainianLocAsset(ExecutableAsset asset)
+        {
+            var ukrainianLocAsset = AssetDatabase.global.GetAssets<LocaleAsset>().FirstOrDefault(f => f.localeId == "uk-UA");
+
+            if (ukrainianLocAsset == null)
             {
-                GameManager.instance.localizationManager.SetActiveLocale(ukrainianLocAsset.localeId);
-                
-                GameManager.instance.localizationManager.ReloadActiveLocale();
+                string directoryPath = Path.GetDirectoryName(asset.path);
+                string localizedPath = Path.Combine(directoryPath, "localization", "uk-UA.loc");
+
+                ukrainianLocAsset = new LocaleAsset();
+                FirstLoad(ukrainianLocAsset, localizedPath);
+
+                log.Info(
+                    $"ukrainianLocAsset data - localeId: {ukrainianLocAsset.localeId}, systemLanguage: {ukrainianLocAsset.systemLanguage}, localizedName: {ukrainianLocAsset.localizedName}");
+            }
+
+            return ukrainianLocAsset;
+        }
+
+        public void LogDbLocales()
+        {
+            log.Info("Existing locales in global db:");
+            foreach (LocaleAsset localeAsset in AssetDatabase.global.GetAssets<LocaleAsset>())
+            {
+                log.Info($"{localeAsset.localeId} {localeAsset.state} {localeAsset.transient} {localeAsset.path} {localeAsset.subPath}" +
+                         $"{localeAsset.guid} {localeAsset.identifier} isDirty:{localeAsset.isDirty} isDummy:{localeAsset.isDummy} isValid:{localeAsset.isValid}");
             }
 
         }
 
+        private void LogManagerLocales()
+        {
+            var locs = _localizationManager.GetSupportedLocales();
+            log.Info("Supported locales by localizationManager: " + string.Join(", ", locs));
+        }
 
-        private void Load(LocaleAsset localeAsset, string filePath)
+        private void FirstLoad(LocaleAsset localeAsset, string filePath)
         {
             using (var input = File.OpenRead(filePath))
             using (var binaryReader = new BinaryReader(input))
