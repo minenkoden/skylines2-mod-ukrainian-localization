@@ -28,15 +28,15 @@
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.3" />
+	<ModVersion Value="1.0.5" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.1.*" />
 	<!--Dependency for the mod, can be set multiple times-->
 	<Dependency Id="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 
-  <ChangeLog># Оновлення 1.0.3
-   * Тепер можна встановлювати локалізацію як мод.
+  <ChangeLog># Оновлення 1.0.5
+   * Додано примусове перемикання гри на українську мову при старті гри, коли мод встановленно.
   </ChangeLog>
 	<!--ChangeLog>
 	</ChangeLog-->

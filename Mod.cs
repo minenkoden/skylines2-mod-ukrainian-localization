@@ -38,6 +38,7 @@ namespace Ukrainian_localization_CSII
             log.Info($"Current active locale {_localizationManager.activeLocaleId}");
 
             _localizationManager.SetActiveLocale(ukrainianLocAsset.localeId);
+            _localizationManager.ReloadActiveLocale();
 
             LogManagerLocales();
             LogDbLocales();
