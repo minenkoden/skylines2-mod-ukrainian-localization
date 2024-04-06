@@ -8,59 +8,111 @@ using System;
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
-using Colossal;
 using System.Linq;
+using Hash128 = Colossal.Hash128;
+using Game.UI.Localization;
+using Game.UI;
 
 namespace Ukrainian_localization_CSII
 {
     public class Mod : IMod
     {
+        const string LOC_FOLDER = "Data~";
+        const string CURRENT_LOCALIZATION = "uk-UA";
+
+
         public static ILog log = LogManager.GetLogger($"{nameof(Ukrainian_localization_CSII)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
+        
+        
         private LocalizationManager _localizationManager;
 
         public void OnLoad(UpdateSystem updateSystem)
         {
-            log.Info(nameof(OnLoad) + " called in phase " + updateSystem.currentPhase);
-
+            _localizationManager = GameManager.instance.localizationManager;
+            
+            log.Info(nameof(OnLoad) + " called in phase " + updateSystem.currentPhase + " at " + DateTime.Now);
+            log.Info("Localization version: " + Colossal.Localization.Version.current.fullVersion);
             if (GameManager.instance.modManager.TryGetExecutableAsset(this, out var asset))
                 log.Info($"Current mod asset at {asset.path}");
-
-            _localizationManager = GameManager.instance.localizationManager;
+            log.Info($"Current active locale {_localizationManager.activeLocaleId}");
 
             LogManagerLocales();
             LogDbLocales();
 
-            var ukrainianLocAsset = LoadUkrainianLocAsset(asset);
+            LoadLocAsset(asset);
 
-            _localizationManager.AddLocale(ukrainianLocAsset);
-            _localizationManager.AddSource(ukrainianLocAsset.localeId, ukrainianLocAsset);
             
-            log.Info($"Current active locale {_localizationManager.activeLocaleId}");
-
-            _localizationManager.SetActiveLocale(ukrainianLocAsset.localeId);
-            _localizationManager.ReloadActiveLocale();
-
             LogManagerLocales();
             LogDbLocales();
         }
 
-        private LocaleAsset LoadUkrainianLocAsset(ExecutableAsset asset)
+        private void LoadLocAsset(ExecutableAsset asset)
         {
-            var ukrainianLocAsset = AssetDatabase.global.GetAssets<LocaleAsset>().FirstOrDefault(f => f.localeId == "uk-UA");
 
-            if (ukrainianLocAsset == null)
+            var filePaths = OverrideLocFile(asset);
+
+            var supportedLocales = _localizationManager.GetSupportedLocales();
+            if (supportedLocales.Contains(CURRENT_LOCALIZATION))
             {
-                string directoryPath = Path.GetDirectoryName(asset.path);
-                string localizedPath = Path.Combine(directoryPath, "localization", "uk-UA.loc");
-
-                ukrainianLocAsset = new LocaleAsset();
-                FirstLoad(ukrainianLocAsset, localizedPath);
+                // Reload in case the last version was replaced
+                _localizationManager.ReloadActiveLocale();
+            }
+            else
+            {
+                var ukrainianLocAsset = new LocaleAsset();
+                FirstLoad(ukrainianLocAsset, filePaths.NewLocalizationPath);
 
                 log.Info(
                     $"ukrainianLocAsset data - localeId: {ukrainianLocAsset.localeId}, systemLanguage: {ukrainianLocAsset.systemLanguage}, localizedName: {ukrainianLocAsset.localizedName}");
-            }
 
-            return ukrainianLocAsset;
+                MakeReserveDBCopy(filePaths.StreamingAssetPath);
+
+                var hash = AddFileToDB(filePaths.NewLocalizationPath);
+                ukrainianLocAsset.guid = hash;
+
+                ukrainianLocAsset.Save();
+
+                _localizationManager.AddLocale(ukrainianLocAsset);
+                _localizationManager.AddSource(ukrainianLocAsset.localeId, ukrainianLocAsset);
+
+                _localizationManager.SetActiveLocale(ukrainianLocAsset.localeId);
+                _localizationManager.ReloadActiveLocale();
+
+                log.Info($"Force set new locale {_localizationManager.activeLocaleId}");
+            }
+        }
+
+        private void MakeReserveDBCopy(string streamingAssetsPath)
+        {
+            string currentDbPath = streamingAssetsPath + "cache.db";
+            string backupDbPath = streamingAssetsPath + $"cache_backup_{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.db";
+            log.Info($"Created DB backup file: {backupDbPath}");
+
+            File.Copy(currentDbPath, backupDbPath, true);
+        }
+
+        private FilePaths OverrideLocFile(ExecutableAsset asset)
+        {
+            string directoryPath = Path.GetDirectoryName(asset.path);
+            string localizedPath = Path.Combine(directoryPath, "localization", CURRENT_LOCALIZATION + ".loc");
+
+            var defaultLocAsset = AssetDatabase.global.GetAssets<LocaleAsset>().FirstOrDefault(f => f.localeId == _localizationManager.fallbackLocaleId);
+
+            log.Info($"defaultLocAsset.path {defaultLocAsset.path}, defaultLocAsset.path.IndexOf(\"Data~\") {defaultLocAsset.path.IndexOf(LOC_FOLDER)}");
+
+            var streamingAssetsPath = defaultLocAsset.path.Substring(0, defaultLocAsset.path.IndexOf(LOC_FOLDER));
+            log.Info($"streamingAssetsPath {streamingAssetsPath}");
+
+
+            string newLocalizedPath = streamingAssetsPath + LOC_FOLDER + "/"+CURRENT_LOCALIZATION+".loc";
+            log.Info($"newLocalizedPath {newLocalizedPath}");
+
+            File.Copy(localizedPath, newLocalizedPath, true);
+            return new FilePaths()
+            {
+                NewLocalizationPath = newLocalizedPath,
+                StreamingAssetPath = streamingAssetsPath
+            };
         }
 
         public void LogDbLocales()
@@ -68,8 +120,8 @@ namespace Ukrainian_localization_CSII
             log.Info("Existing locales in global db:");
             foreach (LocaleAsset localeAsset in AssetDatabase.global.GetAssets<LocaleAsset>())
             {
-                log.Info($"{localeAsset.localeId} {localeAsset.state} {localeAsset.transient} {localeAsset.path} {localeAsset.subPath}" +
-                         $"{localeAsset.guid} {localeAsset.identifier} isDirty:{localeAsset.isDirty} isDummy:{localeAsset.isDummy} isValid:{localeAsset.isValid}");
+                log.Info($"{localeAsset.localeId} {localeAsset.state} {localeAsset.transient} {localeAsset.path} {localeAsset.subPath} " +
+                         $"{localeAsset.guid} {localeAsset.identifier} isDirty:{localeAsset.isDirty} isDummy:{localeAsset.isDummy} isValid:{localeAsset.isValid} {localeAsset.systemLanguage}");
             }
 
         }
@@ -88,8 +140,6 @@ namespace Ukrainian_localization_CSII
                 binaryReader.ReadUInt16();
                 Enum.TryParse<SystemLanguage>(binaryReader.ReadString(), out var m_SystemLanguage);
                 //log.Info($"SystemLang {m_SystemLanguage}");
-                var language = "Ukrainian";
-                Enum.TryParse(language, out m_SystemLanguage);
                 string text = binaryReader.ReadString();
                 var localizedName = binaryReader.ReadString();
                 //log.Info($"localizedName {localizedName}");
@@ -118,7 +168,7 @@ namespace Ukrainian_localization_CSII
                 LocaleData data = new LocaleData(text, dictionary, dictionary2);
 
                 localeAsset.SetData(data, m_SystemLanguage, localizedName);
-                localeAsset.database = AssetDatabase.user;
+                localeAsset.database = AssetDatabase.game;
             }
         }
 
@@ -126,5 +176,33 @@ namespace Ukrainian_localization_CSII
         {
             log.Info(nameof(OnDispose));
         }
+
+        private Hash128 AddFileToDB(string path)
+        {
+            log.Info("Adding file " + path);
+            System.Type type;
+            var assetFactory = DefaultAssetFactory.instance;
+            if (!assetFactory.GetAssetType(Path.GetExtension(path), out type))
+            {
+                log.Info("Adding file not happens");
+                return new Hash128();
+            }
+
+            log.Info($"Adding file happened! type: {type.Name}");
+            var hash = AssetDatabase.game.dataSource.AddEntry(AssetDataPath.Create(path, EscapeStrategy.None), type, new Colossal.Hash128());
+            assetFactory.CreateAndRegisterAsset<LocaleAsset>(type, hash, AssetDatabase.game);
+
+            log.Info($"Saving DB with entry hash: {hash}");
+
+            AssetDatabase.game.SaveCache();
+            log.Info("Saved");
+            return hash;
+        }
+    }
+
+    internal class FilePaths
+    {
+        public string NewLocalizationPath { get; set; }
+        public string StreamingAssetPath { get; set; }
     }
 }
