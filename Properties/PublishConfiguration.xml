@@ -11,7 +11,7 @@
     Після встановлення моду ПЕРЕЗАВАНТАЖТЕ ГРУ, пілся цього Українська з'явиться в налаштуваннях.
     Також перевірте щоб цей мод був у вашому АКТИВНОМУ плейсеті модів.
 
-    Помилки та пропозиції по перекладу можна писати в діскорд. Посилання десь там справа:)
+    Помилки та пропозиції по перекладу, а також про технічні проблеми можна писати в діскорд. Посилання десь там справа:)
 
 
     Ukrainian localization for Cities: Skylines II
@@ -28,15 +28,15 @@
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.5" />
+	<ModVersion Value="1.0.6" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.1.*" />
 	<!--Dependency for the mod, can be set multiple times-->
 	<Dependency Id="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 
-  <ChangeLog># Оновлення 1.0.5
-   * Додано примусове перемикання гри на українську мову при старті гри, коли мод встановленно.
+  <ChangeLog># Оновлення 1.0.6
+   * Додавання локалізації в базу даних гри, тепер мова буде підвантажуватись одразу і буде можливість зберігати зміну на інші мови (українська не буде перемикатися примусово)
   </ChangeLog>
 	<!--ChangeLog>
 	</ChangeLog-->
