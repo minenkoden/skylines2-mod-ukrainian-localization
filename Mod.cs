@@ -10,15 +10,14 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Hash128 = Colossal.Hash128;
-using Game.UI.Localization;
-using Game.UI;
 
 namespace Ukrainian_localization_CSII
 {
     public class Mod : IMod
     {
-        const string LOC_FOLDER = "Data~";
+        const string LOC_FILE = "Locale.cok";
         const string CURRENT_LOCALIZATION = "uk-UA";
+        const string CITIES2_DATA = "Cities2_Data";
 
 
         public static ILog log = LogManager.GetLogger($"{nameof(Ukrainian_localization_CSII)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
@@ -65,7 +64,7 @@ namespace Ukrainian_localization_CSII
                 log.Info(
                     $"ukrainianLocAsset data - localeId: {ukrainianLocAsset.localeId}, systemLanguage: {ukrainianLocAsset.systemLanguage}, localizedName: {ukrainianLocAsset.localizedName}");
 
-                MakeReserveDBCopy(filePaths.StreamingAssetPath);
+                //MakeReserveDBCopy(filePaths.LocalizationFolderPath, filePaths.StreamingAssetPath);
 
                 var hash = AddFileToDB(filePaths.NewLocalizationPath);
                 ukrainianLocAsset.guid = hash;
@@ -82,10 +81,11 @@ namespace Ukrainian_localization_CSII
             }
         }
 
-        private void MakeReserveDBCopy(string streamingAssetsPath)
+        private void MakeReserveDBCopy(string localizationFolderPath, string backupFolderPath)
         {
-            string currentDbPath = streamingAssetsPath + "cache.db";
-            string backupDbPath = streamingAssetsPath + $"cache_backup_{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.db";
+            string currentDbPath = localizationFolderPath + "cache.db";
+            log.Info($"Backup DB folder: {backupFolderPath}");
+            string backupDbPath = backupFolderPath + $"cache_backup_UAmod_{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.db";
             log.Info($"Created DB backup file: {backupDbPath}");
 
             File.Copy(currentDbPath, backupDbPath, true);
@@ -94,23 +94,27 @@ namespace Ukrainian_localization_CSII
         private FilePaths OverrideLocFile(ExecutableAsset asset)
         {
             string directoryPath = Path.GetDirectoryName(asset.path);
-            string localizedPath = Path.Combine(directoryPath, "localization", CURRENT_LOCALIZATION + ".loc");
+            string modLocalizedPath = Path.Combine(directoryPath, "localization", CURRENT_LOCALIZATION + ".loc");
 
             var defaultLocAsset = AssetDatabase.global.GetAssets<LocaleAsset>().FirstOrDefault(f => f.localeId == _localizationManager.fallbackLocaleId);
 
-            log.Info($"defaultLocAsset.path {defaultLocAsset.path}, defaultLocAsset.path.IndexOf(\"Data~\") {defaultLocAsset.path.IndexOf(LOC_FOLDER)}");
+            log.Info($"defaultLocAsset.path {defaultLocAsset.path}, defaultLocAsset.path.IndexOf({LOC_FILE}) {defaultLocAsset.path.IndexOf(LOC_FILE)}");
 
-            var streamingAssetsPath = defaultLocAsset.path.Substring(0, defaultLocAsset.path.IndexOf(LOC_FOLDER));
+            var locFolderPath = defaultLocAsset.path.Substring(0, defaultLocAsset.path.IndexOf(LOC_FILE));
+            log.Info($"locFolderPath {locFolderPath}");
+
+            var streamingAssetsPath = locFolderPath.Substring(0, locFolderPath.IndexOf(CITIES2_DATA) + CITIES2_DATA.Length) + "/StreamingAssets/";
             log.Info($"streamingAssetsPath {streamingAssetsPath}");
+            Directory.CreateDirectory(streamingAssetsPath);
 
-
-            string newLocalizedPath = streamingAssetsPath + LOC_FOLDER + "/"+CURRENT_LOCALIZATION+".loc";
+            string newLocalizedPath = streamingAssetsPath + CURRENT_LOCALIZATION +".loc";
             log.Info($"newLocalizedPath {newLocalizedPath}");
 
-            File.Copy(localizedPath, newLocalizedPath, true);
+            File.Copy(modLocalizedPath, newLocalizedPath, true);
             return new FilePaths()
             {
                 NewLocalizationPath = newLocalizedPath,
+                LocalizationFolderPath = locFolderPath,
                 StreamingAssetPath = streamingAssetsPath
             };
         }
@@ -194,8 +198,8 @@ namespace Ukrainian_localization_CSII
 
             log.Info($"Saving DB with entry hash: {hash}");
 
-            AssetDatabase.game.SaveCache();
-            log.Info("Saved");
+            //AssetDatabase.game.SaveCache();
+            //log.Info("Saved");
             return hash;
         }
     }
@@ -204,5 +208,6 @@ namespace Ukrainian_localization_CSII
     {
         public string NewLocalizationPath { get; set; }
         public string StreamingAssetPath { get; set; }
+        public string LocalizationFolderPath { get; set; }
     }
 }
