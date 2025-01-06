@@ -96,7 +96,7 @@ namespace Ukrainian_localization_CSII
             string directoryPath = Path.GetDirectoryName(asset.path);
             string modLocalizedPath = Path.Combine(directoryPath, "localization", CURRENT_LOCALIZATION + ".loc");
 
-            var defaultLocAsset = AssetDatabase.global.GetAssets<LocaleAsset>().FirstOrDefault(f => f.localeId == _localizationManager.fallbackLocaleId);
+            var defaultLocAsset = AssetDatabase.global.GetAssets<LocaleAsset>().FirstOrDefault(f => f.localeId == _localizationManager.fallbackLocaleId && f.path.Contains(LOC_FILE));
 
             log.Info($"defaultLocAsset.path {defaultLocAsset.path}, defaultLocAsset.path.IndexOf({LOC_FILE}) {defaultLocAsset.path.IndexOf(LOC_FILE)}");
 
