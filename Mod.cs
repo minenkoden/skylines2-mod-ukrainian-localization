@@ -67,7 +67,7 @@ namespace Ukrainian_localization_CSII
                 //MakeReserveDBCopy(filePaths.LocalizationFolderPath, filePaths.StreamingAssetPath);
 
                 var hash = AddFileToDB(filePaths.NewLocalizationPath);
-                ukrainianLocAsset.guid = hash;
+                ukrainianLocAsset.id = hash;
 
                 ukrainianLocAsset.Save();
 
@@ -125,7 +125,7 @@ namespace Ukrainian_localization_CSII
             foreach (LocaleAsset localeAsset in AssetDatabase.global.GetAssets<LocaleAsset>())
             {
                 log.Info($"{localeAsset.localeId} {localeAsset.state} {localeAsset.transient} {localeAsset.path} {localeAsset.subPath} " +
-                         $"{localeAsset.guid} {localeAsset.identifier} isDirty:{localeAsset.isDirty} isDummy:{localeAsset.isDummy} isValid:{localeAsset.isValid} {localeAsset.systemLanguage}");
+                         $"{localeAsset.id} {localeAsset.identifier} isDirty:{localeAsset.isDirty} isDummy:{localeAsset.isDummy} isValid:{localeAsset.isValid} {localeAsset.systemLanguage}");
             }
 
         }
@@ -172,7 +172,7 @@ namespace Ukrainian_localization_CSII
                 LocaleData data = new LocaleData(text, dictionary, dictionary2);
 
                 localeAsset.SetData(data, m_SystemLanguage, localizedName);
-                localeAsset.database = AssetDatabase.game;
+                localeAsset.database = AssetDatabase.user;
             }
         }
 
@@ -181,7 +181,7 @@ namespace Ukrainian_localization_CSII
             log.Info(nameof(OnDispose));
         }
 
-        private Hash128 AddFileToDB(string path)
+        private Identifier AddFileToDB(string path)
         {
             log.Info("Adding file " + path);
             System.Type type;
@@ -189,12 +189,12 @@ namespace Ukrainian_localization_CSII
             if (!assetFactory.GetAssetType(Path.GetExtension(path), out type))
             {
                 log.Info("Adding file not happens");
-                return new Hash128();
+                return new Identifier();
             }
 
             log.Info($"Adding file happened! type: {type.Name}");
-            var hash = AssetDatabase.game.dataSource.AddEntry(AssetDataPath.Create(path, EscapeStrategy.None), type, new Colossal.Hash128());
-            assetFactory.CreateAndRegisterAsset<LocaleAsset>(type, hash, AssetDatabase.game);
+            var hash = AssetDatabase.user.dataSource.AddEntryFromDatabase(AssetDataPath.Create(path, EscapeStrategy.None), type, new Colossal.Hash128());
+            assetFactory.CreateAndRegisterAsset<LocaleAsset>(type, hash, AssetDatabase.user);
 
             log.Info($"Saving DB with entry hash: {hash}");
 

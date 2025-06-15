@@ -8,10 +8,18 @@
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="Ukrainian localization for Cities: Skylines II" /-->
   <LongDescription>
-    Після встановлення моду ПЕРЕЗАВАНТАЖТЕ ГРУ, пілся цього Українська з'явиться в налаштуваннях.
+    У кого виникне проблема з тим шо гра не завантажується, висить просто темним екраном, то робимо наступне:
+    1. шукаємо такий шлях з папки в грі: Cities Skylines II\Cities2_Data\Content\Game
+    2. видаляємо файли:
+         cache.db
+         два файли uk-UA (один uk-UA.loc а інший uk-UA.cib чи шось таке, там їх всього два, не промахнетесь)
+    3. робимо перевірку файлів в стімі.
+
+
+    Після встановлення моду ПЕРЕЗАВАНТАЖТЕ ГРУ, після цього Українська з'явиться в налаштуваннях.
     Також перевірте щоб цей мод був у вашому АКТИВНОМУ плейсеті модів.
 
-    Помилки та пропозиції по перекладу, а також про технічні проблеми можна писати в діскорд. Посилання десь там справа:)
+    Помилки та пропозиції по перекладу, а також про технічні проблеми можна писати в діскорд. Посилання десь там праворуч:)
 
 
     Ukrainian localization for Cities: Skylines II
@@ -28,15 +36,15 @@
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.6" />
+	<ModVersion Value="1.0.18" />
 	<!--Recommended version of the base game to use the mod-->
-	<GameVersion Value="1.1.*" />
+	<GameVersion Value="1.3.*" />
 	<!--Dependency for the mod, can be set multiple times-->
 	<Dependency Id="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 
-  <ChangeLog># Оновлення 1.0.6
-   * Додавання локалізації в базу даних гри, тепер мова буде підвантажуватись одразу і буде можливість зберігати зміну на інші мови (українська не буде перемикатися примусово)
+  <ChangeLog># Оновлення 1.0.17
+   * оновлений опис
   </ChangeLog>
 	<!--ChangeLog>
 	</ChangeLog-->
