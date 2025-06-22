@@ -27,9 +27,11 @@
 	<ItemGroup>
 		<Reference Include="Colossal.AssetPipeline">
 		  <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed\Colossal.AssetPipeline.dll</HintPath>
+		  <Private>False</Private>
 		</Reference>
 		<Reference Include="Colossal.Localization">
 		  <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed\Colossal.Localization.dll</HintPath>
+		  <Private>False</Private>
 		</Reference>
 		<Reference Include="Game">
 			<Private>false</Private>
