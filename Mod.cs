@@ -18,6 +18,7 @@ namespace Ukrainian_localization_CSII
         const string LOC_FILE = "Locale.cok";
         const string CURRENT_LOCALIZATION = "uk-UA";
         const string CITIES2_DATA = "Cities2_Data";
+        const string APP_DATA_GAME_ROOT_FOLDER = "Cities Skylines II";
 
 
         public static ILog log = LogManager.GetLogger($"{nameof(Ukrainian_localization_CSII)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
@@ -27,6 +28,7 @@ namespace Ukrainian_localization_CSII
 
         public void OnLoad(UpdateSystem updateSystem)
         {
+       
             _localizationManager = GameManager.instance.localizationManager;
             
             log.Info(nameof(OnLoad) + " called in phase " + updateSystem.currentPhase + " at " + DateTime.Now);
@@ -59,7 +61,8 @@ namespace Ukrainian_localization_CSII
             else
             {
                 var ukrainianLocAsset = new LocaleAsset();
-                FirstLoad(ukrainianLocAsset, filePaths.NewLocalizationPath);
+
+                FirstLoad(ukrainianLocAsset, filePaths.LocFilePath);
 
                 log.Info(
                     $"ukrainianLocAsset data - localeId: {ukrainianLocAsset.localeId}, systemLanguage: {ukrainianLocAsset.systemLanguage}, localizedName: {ukrainianLocAsset.localizedName}");
@@ -93,10 +96,12 @@ namespace Ukrainian_localization_CSII
 
         private FilePaths OverrideLocFile(ExecutableAsset asset)
         {
+            log.Info("Current mod asset.path: " + asset.path);
             string directoryPath = Path.GetDirectoryName(asset.path);
             string modLocalizedPath = Path.Combine(directoryPath, "localization", CURRENT_LOCALIZATION + ".loc");
+            log.Info("modLocalizedPath: " + modLocalizedPath);
 
-            var defaultLocAsset = AssetDatabase.global.GetAssets<LocaleAsset>().FirstOrDefault(f => f.localeId == _localizationManager.fallbackLocaleId && f.path.Contains(LOC_FILE));
+            var defaultLocAsset = AssetDatabase.global.GetAssets<LocaleAsset>().OrderByDescending(o=>o.database.count).FirstOrDefault(f => f.localeId == _localizationManager.fallbackLocaleId && f.path.Contains(LOC_FILE));
 
             log.Info($"defaultLocAsset.path {defaultLocAsset.path}, defaultLocAsset.path.IndexOf({LOC_FILE}) {defaultLocAsset.path.IndexOf(LOC_FILE)}");
 
@@ -107,15 +112,18 @@ namespace Ukrainian_localization_CSII
             log.Info($"streamingAssetsPath {streamingAssetsPath}");
             Directory.CreateDirectory(streamingAssetsPath);
 
-            string newLocalizedPath = streamingAssetsPath + CURRENT_LOCALIZATION +".loc";
+            //string newLocalizedPath = streamingAssetsPath + CURRENT_LOCALIZATION +".loc";
+            var relativeLocFilePath = modLocalizedPath.Substring(modLocalizedPath.IndexOf(APP_DATA_GAME_ROOT_FOLDER) + APP_DATA_GAME_ROOT_FOLDER.Length + 1);
+            string newLocalizedPath = relativeLocFilePath;
             log.Info($"newLocalizedPath {newLocalizedPath}");
 
-            File.Copy(modLocalizedPath, newLocalizedPath, true);
+            //File.Copy(modLocalizedPath, newLocalizedPath, true);
             return new FilePaths()
             {
                 NewLocalizationPath = newLocalizedPath,
                 LocalizationFolderPath = locFolderPath,
-                StreamingAssetPath = streamingAssetsPath
+                StreamingAssetPath = streamingAssetsPath,
+                LocFilePath = modLocalizedPath
             };
         }
 
@@ -193,7 +201,10 @@ namespace Ukrainian_localization_CSII
             }
 
             log.Info($"Adding file happened! type: {type.Name}");
-            var hash = AssetDatabase.user.dataSource.AddEntryFromDatabase(AssetDataPath.Create(path, EscapeStrategy.None), type, new Colossal.Hash128());
+            log.Info($"Type of AssetDatabase.user.dataSource is {AssetDatabase.user.dataSource.GetType().Name}");
+            var assetDataPath = AssetDataPath.Create(path, EscapeStrategy.PathAndFilename);
+            log.Info($"assetDataPath is {assetDataPath}");
+            var hash = AssetDatabase.user.dataSource.AddEntryFromDatabase(assetDataPath, type, new Colossal.Hash128());
             assetFactory.CreateAndRegisterAsset<LocaleAsset>(type, hash, AssetDatabase.user);
 
             log.Info($"Saving DB with entry hash: {hash}");
@@ -209,5 +220,6 @@ namespace Ukrainian_localization_CSII
         public string NewLocalizationPath { get; set; }
         public string StreamingAssetPath { get; set; }
         public string LocalizationFolderPath { get; set; }
+        public string LocFilePath { get; set; }
     }
 }
