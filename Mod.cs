@@ -19,6 +19,7 @@ namespace Ukrainian_localization_CSII
         const string CURRENT_LOCALIZATION = "uk-UA";
         const string CITIES2_DATA = "Cities2_Data";
         const string APP_DATA_GAME_ROOT_FOLDER = "Cities Skylines II";
+        const string MOD_ID = "76545";
 
 
         public static ILog log = LogManager.GetLogger($"{nameof(Ukrainian_localization_CSII)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
@@ -53,7 +54,13 @@ namespace Ukrainian_localization_CSII
             var filePaths = OverrideLocFile(asset);
 
             var supportedLocales = _localizationManager.GetSupportedLocales();
-            if (supportedLocales.Contains(CURRENT_LOCALIZATION))
+            bool hasOurLocale = supportedLocales.Contains(CURRENT_LOCALIZATION); // it's possible also for custom maps with uk-UA locale save
+            if (hasOurLocale) // to handle custom map case
+            {
+                hasOurLocale = !AssetDatabase.global.GetAssets<LocaleAsset>().Any(l=>l.localeId == CURRENT_LOCALIZATION && l.path.Contains(MOD_ID));
+            }
+
+            if (hasOurLocale)
             {
                 // Reload in case the last version was replaced
                 _localizationManager.ReloadActiveLocale();
