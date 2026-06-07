@@ -57,7 +57,7 @@ namespace Ukrainian_localization_CSII
             bool hasOurLocale = supportedLocales.Contains(CURRENT_LOCALIZATION); // it's possible also for custom maps with uk-UA locale save
             if (hasOurLocale) // to handle custom map case
             {
-                hasOurLocale = !AssetDatabase.global.GetAssets<LocaleAsset>().Any(l=>l.localeId == CURRENT_LOCALIZATION && l.path.Contains(MOD_ID));
+                hasOurLocale = AssetDatabase.global.GetAssets<LocaleAsset>().Any(l=>l.localeId == CURRENT_LOCALIZATION && l.path.Contains(MOD_ID));
             }
 
             if (hasOurLocale)
